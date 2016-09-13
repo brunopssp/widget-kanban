@@ -2,7 +2,7 @@
 Get the Lead Time and the Throughput of a set of Work Items in a specific query and show as a tile on TFS dashboard.
 
 ##Objetivo
->Esse widget em específico verifica o Throughput (Itens Entregues) ou Lead Time (Tempo para conclusão) dos work items retornados em uma determinada consulta.
+>Esse widget verifica o Throughput (Itens Entregues) ou Lead Time (Tempo para conclusão) dos work items retornados em uma determinada consulta.
 
 ##Configuração do Ambiente
 >####Node
