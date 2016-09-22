@@ -19,7 +19,7 @@ VSS.init({
 
 VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", "TFS/WorkItemTracking/Contracts"],
     function(WidgetHelpers, TFS_Wit_WebApi, TFS_contracts) {
-        VSS.register("LeadTimeMetric.Configuration", function() {
+        VSS.register("AgileMetric.Configuration", function() {
             return {
                 load: function(widgetSettings, widgetConfigurationContext) {
                     settings = JSON.parse(widgetSettings.customSettings.data);
@@ -30,7 +30,7 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", 
                         // else if (settings.metric == "cycletime")
                         //     $("input[name=radio]")[1].checked = true;
                         else if (settings.metric == "leadtime")
-                            $("input[name=radio]")[2].checked = true;
+                            $("input[name=radio]")[1].checked = true;
                     } else {
                         $("input[name=radio]")[0].checked = true;
                     }

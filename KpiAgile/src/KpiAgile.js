@@ -25,7 +25,7 @@ VSS.init({
 VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient"],
     function(WidgetHelpers, TFS_Wit_WebApi) {
         WidgetHelpers.IncludeWidgetStyles();
-        VSS.register("LeadTimeMetric", function() {
+        VSS.register("AgileMetric", function() {
             var getLeadTime = function(widgetSettings) {
 
                 // Get a WIT client to make REST calls to VSTS
@@ -165,10 +165,20 @@ function EndProcess() {
 
 function ShowResult() {
     if (intCountWI.length >= resultQueryLength) {
+
+        if (intCountDoneWI.length <= 0) {
+            $('#error').empty();
+            $('h2.title').text(settings.queryPath.substr(15));
+            $('#query-info-container').empty().text("-");
+            $('#footer').empty().text("This query does not return any Done work item");
+            $('#widget').css({ 'color': 'white', 'background-color': 'rgb(0, 156, 204)', 'text-align': 'left' });
+            return;
+        }
         var tsIntervaloTotal = DaysBetween(dtStartThroughput, dtEndThroughput)
 
         $('#error').empty();
         $('h2.title').text(settings.queryPath.substr(15));
+        $('#query-info-container').empty().text("0");
         $('#widget').css({ 'color': 'white', 'background-color': 'rgb(0, 156, 204)', 'text-align': 'left' });
 
         var cycleTime = (tsIntervaloTotal / intCountDoneWI.length);

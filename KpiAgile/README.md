@@ -17,8 +17,8 @@ Get the Lead Time and the Throughput of a set of Work Items in a specific query 
 ####Atualizar o arquivo manifest
 	vss-extension.json
 ####Empacotar a extensão
-	npm i -g tfx-cli.
-	cd <pasta da extensão onde o vss-extension.json está>. 
+	npm i -g tfx-cli
+	cd <pasta da extensão onde o vss-extension.json está>
 	tfx extension create
 ####Upload e Install no TFS
 https://www.visualstudio.com/en-us/docs/marketplace/get-tfs-extensions#upload-to-team-foundation-server

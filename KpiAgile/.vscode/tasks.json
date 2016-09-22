@@ -9,7 +9,7 @@ Please note: None of the conditions outlined in the disclaimer above will superc
 */
 {
     "version": "0.1.0",
-    "command": "babel",
+    "command": "${workspaceRoot}/node_modules/.bin/babel",
     "isShellCommand": true,
     "tasks": [{
         "args": ["src", "--out-dir", "js", "-w", "--source-maps"],

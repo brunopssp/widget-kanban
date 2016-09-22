@@ -26,7 +26,7 @@ VSS.init({
 
 VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient"], function (WidgetHelpers, TFS_Wit_WebApi) {
     WidgetHelpers.IncludeWidgetStyles();
-    VSS.register("LeadTimeMetric", function () {
+    VSS.register("AgileMetric", function () {
         var getLeadTime = function getLeadTime(widgetSettings) {
 
             // Get a WIT client to make REST calls to VSTS
@@ -167,10 +167,20 @@ function EndProcess() {
 
 function ShowResult() {
     if (intCountWI.length >= resultQueryLength) {
+
+        if (intCountDoneWI.length <= 0) {
+            $('#error').empty();
+            $('h2.title').text(settings.queryPath.substr(15));
+            $('#query-info-container').empty().text("-");
+            $('#footer').empty().text("This query does not return any Done work item");
+            $('#widget').css({ 'color': 'white', 'background-color': 'rgb(0, 156, 204)', 'text-align': 'left' });
+            return;
+        }
         var tsIntervaloTotal = DaysBetween(dtStartThroughput, dtEndThroughput);
 
         $('#error').empty();
         $('h2.title').text(settings.queryPath.substr(15));
+        $('#query-info-container').empty().text("0");
         $('#widget').css({ 'color': 'white', 'background-color': 'rgb(0, 156, 204)', 'text-align': 'left' });
 
         var cycleTime = tsIntervaloTotal / intCountDoneWI.length;
@@ -182,15 +192,15 @@ function ShowResult() {
         if (settings.metric == "cycletime") {
 
             $('#query-info-container').empty().html(Math.round(cycleTime * 10) / 10);
-            $('#footer').empty().text("(Cycle Time) Days by Item");
+            $('#footer').empty().text("(Cycle Time) <br> Days by Item");
         } else if (settings.metric == "throughput") {
             var throughputPerWeek = intCountDoneWI.length / (tsIntervaloTotal / 7);
             $('#query-info-container').empty().html(Math.round(throughputPerWeek * 10) / 10);
-            $('#footer').empty().text("(Throughput) Items by Week");
+            $('#footer').empty().text("(Throughput) <br> Items by Week");
         } else if (settings.metric == "leadtime") {
             var leadTime = nWIP.length * cycleTime; //---"WIP * CycleTime" ou "WIP / Throughput
             $('#query-info-container').empty().html(Math.round(leadTime * 10) / 10);
-            $('#footer').empty().text("(Lead Time) Estimate in Days");
+            $('#footer').empty().text("(Lead Time) <br> Estimate in Days");
         }
     }
 }

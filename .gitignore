@@ -1,0 +1,9 @@
+node_modules
+bin
+packages
+*.vsix
+obj
+widgets
+/KpiAgile/KpiAgile/publish
+*.suo
+/KpiAgile/.vs
