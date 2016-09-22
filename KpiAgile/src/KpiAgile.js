@@ -198,7 +198,7 @@ function ShowResult() {
         } else if (settings.metric == "leadtime") {
             var leadTime = (nWIP.length * cycleTime); //---"WIP * CycleTime" ou "WIP / Throughput
             $('#query-info-container').empty().html(Math.round(leadTime * 10) / 10);
-            $('#footer').empty().text("(Lead Time) <br 123/> Estimate in Days");
+            $('#footer').empty().text("(Lead Time) <br /> Estimate in Days");
         }
 
     }
