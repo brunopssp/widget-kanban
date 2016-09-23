@@ -192,15 +192,15 @@ function ShowResult() {
         if (settings.metric == "cycletime") {
 
             $('#query-info-container').empty().html(Math.round(cycleTime * 10) / 10);
-            $('#footer').empty().text("(Cycle Time) <br /> Days by Item");
+            $('#footer').empty().html("(Cycle Time) <br /> Days by Item");
         } else if (settings.metric == "throughput") {
             var throughputPerWeek = intCountDoneWI.length / (tsIntervaloTotal / 7);
             $('#query-info-container').empty().html(Math.round(throughputPerWeek * 10) / 10);
-            $('#footer').empty().text("(Throughput) <br /> Items by Week");
+            $('#footer').empty().html("(Throughput) <br /> Items by Week");
         } else if (settings.metric == "leadtime") {
             var leadTime = nWIP.length * cycleTime; //---"WIP * CycleTime" ou "WIP / Throughput
             $('#query-info-container').empty().html(Math.round(leadTime * 10) / 10);
-            $('#footer').empty().text("(Lead Time) <br /> Estimate in Days");
+            $('#footer').empty().html("(Lead Time) <br /> Estimate in Days");
         }
     }
 }

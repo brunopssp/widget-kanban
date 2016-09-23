@@ -81,21 +81,20 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", 
 function getListQueries(queries) {
     //Get query result
     queries.children.forEach(rootFolderQuery => {
-        if (rootFolderQuery.hasChildren == undefined) {
-            setDropDownList(rootFolderQuery);
-        }
         if (rootFolderQuery.hasChildren == true) {
             rootFolderQuery.children.forEach(subFolderQuery => {
                 if (subFolderQuery.hasChildren == undefined) {
-                    setDropDownList(subFolderQuery);
+                    fillDropDownList(subFolderQuery);
                 }
             });
+        }
+        if (rootFolderQuery.hasChildren == undefined) {
+            fillDropDownList(rootFolderQuery);
         }
     });
 }
 
-function setDropDownList(rootFolderQuery) {
+function fillDropDownList(rootFolderQuery) {
     //Set results to DropDownList
     $("<option>" + rootFolderQuery.path + "</option>").attr("value", rootFolderQuery.path).appendTo($(queryDropdown));
-    $(queryDropdown).val(settings.queryPath);
 }
