@@ -33,24 +33,28 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", 
                 var projectId = VSS.getWebContext().project.id;
                 var myTeam = TFS_Team_WebApi.getClient();
                 settings = JSON.parse(widgetSettings.customSettings.data);
-                if (!settings || !settings.metric) {
+
+                if (!settings) { //if no settings, choose throughput
                     var customSettings = {
                         metric: "throughput"
                     };
                     settings = customSettings;
                 }
-                var $title = $('h2.title');
-                $title.text(settings.title);
 
+                if (settings.title && !settings.metric) { //only when update title
+                    var $title = $('h2.title');
+                    $title.text(settings.title);
+                    return WidgetHelpers.WidgetStatusHelper.Success();
+                }
+
+                var teamContext = {
+                    project: VSS.getWebContext().project.name,
+                    projectId: VSS.getWebContext().project.id,
+                    team: VSS.getWebContext().team.name,
+                    teamId: VSS.getWebContext().team.id
+                };
 
                 if (WidgetHelpers.WidgetEvent.ConfigurationChange) {
-
-                    var teamContext = {
-                        project: VSS.getWebContext().project.name,
-                        projectId: VSS.getWebContext().project.id,
-                        team: VSS.getWebContext().team.name,
-                        teamId: VSS.getWebContext().team.id
-                    };
                     //recuperar area path 
                     return myTeam.getTeamFieldValues(teamContext).then(areaPath => {
                             //criar consulta
@@ -61,7 +65,7 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", 
                                     "WHERE [System.WorkItemType] in ('Product Backlog Item', 'Bug') " +
                                     "AND [System.State] <> 'New' " +
                                     "AND [System.State] <> 'Removed' " +
-                                    "AND [System.CreatedDate] >= @Today - 180 " +
+                                    //"AND [System.CreatedDate] >= @Today - 180 " +
                                     "AND [System.AreaPath] under '" + areaPath.defaultValue + "'"
                             };
 
@@ -175,6 +179,10 @@ function ShowResult() {
             formatError();
             return;
         }
+        if (settings.title || settings.title == "") {
+            var $title = $('h2.title');
+            $title.text(settings.title);
+        }
         var tsIntervaloTotal = DaysBetween(dtStartThroughput, dtEndThroughput)
 
         if (settings.metric == "throughput") {
@@ -214,8 +222,8 @@ function EndProcess() {
 
 function formatError() {
     $('#error').empty();
-    $('h2.title').text("Minha consulta");
+    $('h2.title').text("Agile Metrics");
     $('#query-info-container').empty().text("-");
-    $('#footer').empty().text("This query does not return any Done work item");
+    $('#footer').empty().text("This query does not return any work item");
     $('#widget').css({ 'color': 'white', 'background-color': 'rgb(0, 156, 204)', 'text-align': 'left' });
 }

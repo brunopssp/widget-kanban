@@ -40,7 +40,6 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", 
                         var customSettings = {
                             data: JSON.stringify({
                                 title: $(title).val(),
-                                metric: $(optionsMetric, "#optionsMetric").val()
                             })
                         };
                         var eventName = WidgetHelpers.WidgetEvent.ConfigurationChange;

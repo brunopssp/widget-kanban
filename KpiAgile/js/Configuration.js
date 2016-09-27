@@ -37,8 +37,7 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", 
                 $("#name-input input").on("keyup", function () {
                     var customSettings = {
                         data: JSON.stringify({
-                            title: $(title).val(),
-                            metric: $(optionsMetric, "#optionsMetric").val()
+                            title: $(title).val()
                         })
                     };
                     var eventName = WidgetHelpers.WidgetEvent.ConfigurationChange;
