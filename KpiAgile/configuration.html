@@ -16,17 +16,18 @@ Please note: None of the conditions outlined in the disclaimer above will superc
 
 <body>
     <div class="container">
-        <div class="dropdown">
-            <!--<fieldset>-->
+        <!--<div class="dropdown">
             <label>Query: </label>
-            <!--<label class="label">Query: </label>-->
             <div class="wrapper">
                 <select id="query-path-dropdown" style="margin-top:10px">	
 			        <option value="" selected disabled hidden>Please select a query</option>
                 </select>
             </div>
+        </div>-->
+        <div class="single-line-text-input" id="name-input">
+            <label>Name</label>
+            <input type="text" value="Agile Metrics" name="title"></input>
         </div>
-        <!--</fieldset>-->
         <br/>
         <fieldset class="radio" id="optionsMetric">
             <legend>Metric: </legend>
@@ -37,6 +38,11 @@ Please note: None of the conditions outlined in the disclaimer above will superc
             <input type="radio" id="radio-leadtime" value="leadtime" name="radio">
             <label for="radio-leadtime">Lead Time</label><br/>
         </fieldset>
+        <!--<br/>
+        <div id="128" class="combo input-text-box date-time drop">
+            <div class="wrap"><input type="text" id="chartStartDate" autocomplete="off"></div>
+            <div class="drop bowtie-icon bowtie-calendar"></div>
+        </div>-->
     </div>
 </body>
 

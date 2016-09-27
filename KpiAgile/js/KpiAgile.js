@@ -24,7 +24,7 @@ VSS.init({
     usePlatformStyles: true
 });
 
-VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient"], function (WidgetHelpers, TFS_Wit_WebApi) {
+VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", "TFS/Work/RestClient"], function (WidgetHelpers, TFS_Wit_WebApi, TFS_Team_WebApi) {
     WidgetHelpers.IncludeWidgetStyles();
     VSS.register("AgileMetric", function () {
         var getLeadTime = function getLeadTime(widgetSettings) {
@@ -32,25 +32,35 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient"],
             // Get a WIT client to make REST calls to VSTS
             client = TFS_Wit_WebApi.getClient();
             var projectId = VSS.getWebContext().project.id;
+            var myTeam = TFS_Team_WebApi.getClient();
             settings = JSON.parse(widgetSettings.customSettings.data);
-            if (!settings || !settings.queryPath) {
-                $('#query-info-container').empty().text("0");
-                $('#footer').empty().text("Please configure a query path");
-                return WidgetHelpers.WidgetStatusHelper.Success();
+            if (!settings || !settings.metric) {
+                var customSettings = {
+                    metric: "throughput"
+                };
+                settings = customSettings;
             }
-            if (WidgetHelpers.WidgetEvent.ConfigurationChange) {
-                $('#error').empty();
-                $('h2.title').text("");
-                $('#query-info-container').empty().text("");
-                $('#widget').css({ 'background-color': 'rgb(255, 255, 255)', 'text-align': 'center' });
-                $("<img></img>").attr("src", "img/loadingAnimation.gif").appendTo($('#query-info-container'));
-                $('#footer').empty().text("");
+            var $title = $('h2.title');
+            $title.text(settings.title);
 
-                //Get a tfs query to get it's id
-                return client.getQuery(projectId, settings.queryPath).then(function (query) {
-                    //Get query result
-                    client.queryById(query.id).then(ResultQuery, function (error) {
-                        $('#error').text("There is an error in query " + settings.queryPath.substr(15) + ": " + error.message);
+            if (WidgetHelpers.WidgetEvent.ConfigurationChange) {
+
+                var teamContext = {
+                    project: VSS.getWebContext().project.name,
+                    projectId: VSS.getWebContext().project.id,
+                    team: VSS.getWebContext().team.name,
+                    teamId: VSS.getWebContext().team.id
+                };
+                //recuperar area path 
+                return myTeam.getTeamFieldValues(teamContext).then(function (areaPath) {
+                    //criar consulta
+                    //nocture.dk/2016/01/02/lets-make-a-visual-studio-team-services-extension/
+                    var Wiql = {
+                        query: "SELECT [System.Id],[System.Title] " + "FROM WorkItems " + "WHERE [System.WorkItemType] in ('Product Backlog Item', 'Bug') " + "AND [System.State] <> 'New' " + "AND [System.State] <> 'Removed' " + "AND [System.CreatedDate] >= @Today - 180 " + "AND [System.AreaPath] under '" + areaPath.defaultValue + "'"
+                    };
+
+                    client.queryByWiql(Wiql).then(ResultQuery, function (error) {
+                        $('#error').text("There is an error in query: " + error.message);
                         return WidgetHelpers.WidgetStatusHelper.Failure(error.message);
                     });
                     return WidgetHelpers.WidgetStatusHelper.Success();
@@ -59,7 +69,6 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient"],
                 });
             }
         };
-
         return {
             load: function load(widgetSettings) {
                 return getLeadTime(widgetSettings);
@@ -74,9 +83,12 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient"],
 
 function ResultQuery(resultQuery) {
 
-    //ForEach workItem in query, get the respective Revision
+    //Clean the variables for each save time
     intCountDoneWI = new Array();
     intCountWI = new Array();
+    nWIP = new Array();
+
+    //ForEach workItem in query, get the respective Revision
     if (resultQuery.queryType == 1) {
         //flat query
         resultQueryLength = resultQuery.workItems.length;
@@ -94,20 +106,13 @@ function ResultQuery(resultQuery) {
         }
     }
     if (resultQueryLength == 0) {
-        $('#error').empty();
-        $('h2.title').text(settings.queryPath.substr(15));
-        $('#query-info-container').empty().text("-");
-        $('#footer').empty().text("This query does not return any work items");
+        formatError();
         return WidgetHelpers.WidgetStatusHelper.Success();
     }
 }
 
 function ProcessRevisions(revisions) {
 
-    if (revisions[revisions.length - 1].fields["System.State"] == "New") {
-        EndProcess();
-        return;
-    }
     //Count WIP
     if (revisions[revisions.length - 1].fields["System.State"] != "Done") {
         nWIP.push(1);
@@ -118,19 +123,19 @@ function ProcessRevisions(revisions) {
     //Validations
     if (!revisions.some(function (s) {
         return s.fields["System.State"] == "Approved";
-    })) //Valida se o PBI passou pelo stage Inicial
+    })) //Verify if PBI was approved
         {
             EndProcess();
             return;
         }
     if (!revisions.some(function (s) {
         return s.fields["System.State"] == "Done";
-    })) //Valida se o PBI chegou no stage Final
+    })) //Verify if PBI wasn't Done
         {
             EndProcess();
             return;
         }
-    if (revisions[revisions.length - 1].fields["System.State"] == "Approved") //Valida se o PBI voltou ao stage inicial
+    if (revisions[revisions.length - 1].fields["System.State"] == "Approved") //Verify if PBI return to initial state
         {
             EndProcess();
             return;
@@ -159,46 +164,21 @@ function ProcessRevisions(revisions) {
     EndProcess();
 }
 
-function EndProcess() {
-    intCountWI.push(1);
-    ShowResult();
-    return;
-}
-
 function ShowResult() {
     if (intCountWI.length >= resultQueryLength) {
 
         if (intCountDoneWI.length <= 0) {
-            $('#error').empty();
-            $('h2.title').text(settings.queryPath.substr(15));
-            $('#query-info-container').empty().text("-");
-            $('#footer').empty().text("This query does not return any Done work item");
-            $('#widget').css({ 'color': 'white', 'background-color': 'rgb(0, 156, 204)', 'text-align': 'left' });
+            formatError();
             return;
         }
         var tsIntervaloTotal = DaysBetween(dtStartThroughput, dtEndThroughput);
 
-        $('#error').empty();
-        $('h2.title').text(settings.queryPath.substr(15));
-        $('#query-info-container').empty().text("0");
-        $('#widget').css({ 'color': 'white', 'background-color': 'rgb(0, 156, 204)', 'text-align': 'left' });
-
-        var cycleTime = tsIntervaloTotal / intCountDoneWI.length;
-
-        // var sumWIP = 0;
-        // nWIP.forEach(item => {
-        //     sumWIP += item;
-        // });
-        if (settings.metric == "cycletime") {
-
-            $('#query-info-container').empty().html(Math.round(cycleTime * 10) / 10);
-            $('#footer').empty().html("(Cycle Time) <br /> Days by Item");
-        } else if (settings.metric == "throughput") {
+        if (settings.metric == "throughput") {
             var throughputPerWeek = intCountDoneWI.length / (tsIntervaloTotal / 7);
             $('#query-info-container').empty().html(Math.round(throughputPerWeek * 10) / 10);
             $('#footer').empty().html("(Throughput) <br /> Items by Week");
         } else if (settings.metric == "leadtime") {
-            var leadTime = nWIP.length * cycleTime; //---"WIP * CycleTime" ou "WIP / Throughput
+            var leadTime = nWIP.length / (intCountDoneWI.length / tsIntervaloTotal); //---"WIP * CycleTime" ou "WIP / Throughput
             $('#query-info-container').empty().html(Math.round(leadTime * 10) / 10);
             $('#footer').empty().html("(Lead Time) <br /> Estimate in Days");
         }
@@ -218,5 +198,19 @@ function DaysBetween(date1, date2) {
 
     // Convert back to days and return
     return Math.round(difference_ms / one_day);
+}
+
+function EndProcess() {
+    intCountWI.push(1);
+    ShowResult();
+    return;
+}
+
+function formatError() {
+    $('#error').empty();
+    $('h2.title').text("Minha consulta");
+    $('#query-info-container').empty().text("-");
+    $('#footer').empty().text("This query does not return any Done work item");
+    $('#widget').css({ 'color': 'white', 'background-color': 'rgb(0, 156, 204)', 'text-align': 'left' });
 }
 //# sourceMappingURL=KpiAgile.js.map

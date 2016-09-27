@@ -7,8 +7,9 @@ We grant You a nonexclusive, royalty-free right to use and modify the Sample Cod
 (iii) to indemnify, hold harmless, and defend Us and Our suppliers from and against any claims or lawsuits, including attorneys’ fees, that arise or result from the use or distribution of the Sample Code.
 Please note: None of the conditions outlined in the disclaimer above will supercede the terms and conditions contained within the Premier Customer Services Description.
 */
-var queryDropdown = ("#query-path-dropdown");
+//var queryDropdown = ("#query-path-dropdown");
 var optionsMetric = ("input[type='radio'][name='radio']:checked");
+var title = ("input[type='text'][name='title']");
 
 var settings = null;
 
@@ -23,25 +24,26 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", 
             return {
                 load: function(widgetSettings, widgetConfigurationContext) {
                     settings = JSON.parse(widgetSettings.customSettings.data);
-                    if (settings && settings.queryPath && settings.metric) {
-                        $(queryDropdown).val(settings.queryPath);
+                    if (settings && settings.metric) {
+                        //$(queryDropdown).val(settings.queryPath);
+                        $(title).val(settings.title);
+
                         if (settings.metric == "throughput")
                             $("input[name=radio]")[0].checked = true;
-                        // else if (settings.metric == "cycletime")
-                        //     $("input[name=radio]")[1].checked = true;
                         else if (settings.metric == "leadtime")
                             $("input[name=radio]")[1].checked = true;
                     } else {
                         $("input[name=radio]")[0].checked = true;
                     }
 
-                    TFS_Wit_WebApi.getClient().getQuery(VSS.getWebContext().project.id, "Shared Queries", TFS_contracts.QueryExpand.None, 2).then(getListQueries);
+                    //TFS_Wit_WebApi.getClient().getQuery(VSS.getWebContext().project.id, "Shared Queries", TFS_contracts.QueryExpand.None, 2).then(getListQueries);
 
                     //Enable Live Preview
-                    $(queryDropdown).on("change", function() {
+                    $("#name-input input").on("keyup", function() {
                         var customSettings = {
                             data: JSON.stringify({
-                                queryPath: $(queryDropdown).val(),
+                                //queryPath: $(queryDropdown).val(),
+                                title: $(title).val(),
                                 metric: $(optionsMetric, "#optionsMetric").val()
                             })
                         };
@@ -52,7 +54,8 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", 
                     $("#optionsMetric input").on("change", function() {
                         var customSettings = {
                             data: JSON.stringify({
-                                queryPath: $(queryDropdown).val(),
+                                //queryPath: $(queryDropdown).val(),
+                                title: $(title).val(),
                                 metric: $(optionsMetric, "#optionsMetric").val()
                             })
                         };
@@ -66,7 +69,8 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", 
                 onSave: function() {
                     var customSettings = {
                         data: JSON.stringify({
-                            queryPath: $(queryDropdown).val(),
+                            //queryPath: $(queryDropdown).val(),
+                            title: $(title).val(),
                             metric: $(optionsMetric, "#optionsMetric").val()
                         })
                     };
@@ -78,23 +82,23 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", 
     }
 );
 
-function getListQueries(queries) {
-    //Get query result
-    queries.children.forEach(rootFolderQuery => {
-        if (rootFolderQuery.hasChildren == true) {
-            rootFolderQuery.children.forEach(subFolderQuery => {
-                if (subFolderQuery.hasChildren == undefined) {
-                    fillDropDownList(subFolderQuery);
-                }
-            });
-        }
-        if (rootFolderQuery.hasChildren == undefined) {
-            fillDropDownList(rootFolderQuery);
-        }
-    });
-}
+// function getListQueries(queries) {
+//     //Get query result
+//     queries.children.forEach(rootFolderQuery => {
+//         if (rootFolderQuery.hasChildren == true) {
+//             rootFolderQuery.children.forEach(subFolderQuery => {
+//                 if (subFolderQuery.hasChildren == undefined) {
+//                     fillDropDownList(subFolderQuery);
+//                 }
+//             });
+//         }
+//         if (rootFolderQuery.hasChildren == undefined) {
+//             fillDropDownList(rootFolderQuery);
+//         }
+//     });
+// }
 
-function fillDropDownList(rootFolderQuery) {
-    //Set results to DropDownList
-    $("<option>" + rootFolderQuery.path + "</option>").attr("value", rootFolderQuery.path).appendTo($(queryDropdown));
-}
+// function fillDropDownList(rootFolderQuery) {
+//     //Set results to DropDownList
+//     $("<option>" + rootFolderQuery.path + "</option>").attr("value", rootFolderQuery.path).appendTo($(queryDropdown));
+// }
