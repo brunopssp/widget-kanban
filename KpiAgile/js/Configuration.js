@@ -12,8 +12,10 @@ Please note: None of the conditions outlined in the disclaimer above will superc
 //var queryDropdown = ("#query-path-dropdown");
 var optionsMetric = "input[type='radio'][name='radio']:checked";
 var title = "input[type='text'][name='title']";
-
+var startDate = "input[type='text'][name='chartStartDate']";
 var settings = null;
+var errorSingleLineInput = "#validation";
+var today = new Date();
 
 VSS.init({
     explicitNotifyLoaded: true,
@@ -21,13 +23,15 @@ VSS.init({
 });
 
 VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", "TFS/WorkItemTracking/Contracts"], function (WidgetHelpers, TFS_Wit_WebApi, TFS_contracts) {
+    WidgetHelpers.IncludeWidgetStyles();
+    WidgetHelpers.IncludeWidgetConfigurationStyles();
     VSS.register("AgileMetric.Configuration", function () {
         return {
             load: function load(widgetSettings, widgetConfigurationContext) {
                 settings = JSON.parse(widgetSettings.customSettings.data);
-                if (settings && settings.metric && settings.title) {
+                if (settings && settings.metric && settings.title && settings.date) {
                     $(title).val(settings.title);
-
+                    $(startDate).val(settings.date);
                     if (settings.metric == "throughput") $("input[name=radio]")[0].checked = true;else if (settings.metric == "leadtime") $("input[name=radio]")[1].checked = true;
                 } else {
                     $("input[name=radio]")[0].checked = true;
@@ -48,6 +52,26 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", 
                     var customSettings = {
                         data: JSON.stringify({
                             title: $(title).val(),
+                            date: $(startDate).val(),
+                            metric: $(optionsMetric, "#optionsMetric").val()
+                        })
+                    };
+                    var eventName = WidgetHelpers.WidgetEvent.ConfigurationChange;
+                    var eventArgs = WidgetHelpers.WidgetEvent.Args(customSettings);
+                    widgetConfigurationContext.notify(eventName, eventArgs);
+                });
+                $("#date-input input").on("change", function () {
+                    var selectedDate = new Date($("#chartStartDate").datepicker("getDate"));
+                    if (selectedDate.getTime() > today.getTime()) {
+                        $(errorSingleLineInput).text("The start date you specified is not valid. You cannot specify a date in the future.");
+                        $(errorSingleLineInput).parent().css("visibility", "visible");
+                        return;
+                    }
+                    $(errorSingleLineInput).parent().css("visibility", "hidden");
+                    var customSettings = {
+                        data: JSON.stringify({
+                            title: $(title).val(),
+                            date: $(startDate).val(),
                             metric: $(optionsMetric, "#optionsMetric").val()
                         })
                     };
@@ -62,6 +86,7 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", 
                 var customSettings = {
                     data: JSON.stringify({
                         title: $(title).val(),
+                        date: $(startDate).val(),
                         metric: $(optionsMetric, "#optionsMetric").val()
                     })
                 };

@@ -76,6 +76,10 @@
             "addressable": true
         },
         {
+            "path": "css",
+            "addressable": true
+        },
+        {
             "path": "sdk/scripts",
             "addressable": true
         },

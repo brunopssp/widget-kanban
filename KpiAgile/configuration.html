@@ -8,41 +8,52 @@ Please note: None of the conditions outlined in the disclaimer above will superc
 
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
     <script src="sdk/scripts/VSS.SDK.min.js"></script>
     <script src="js/Configuration.js"></script>
+    <link rel="stylesheet" href="css/jquery-ui.css">
+    <script src="sdk/scripts/jquery-1.12.4.js"></script>
+    <script src="sdk/scripts/jquery-ui.js"></script>
+    <script src="sdk/scripts/datepicker-pt-BR.js"></script>
+    <script>
+        $(function() {
+            $("#chartStartDate").datepicker($.datepicker.regional["pt-BR"]);
+        });
+    </script>
 </head>
 
 <body>
-    <div class="container">
-        <!--<div class="dropdown">
-            <label>Query: </label>
-            <div class="wrapper">
-                <select id="query-path-dropdown" style="margin-top:10px">	
-			        <option value="" selected disabled hidden>Please select a query</option>
-                </select>
+    <div class="widget-configuration">
+        <div class="widget">
+            <div class="single-line-text-input" id="name-input">
+                <label>Name</label>
+                <input type="text" value="Agile Metrics" name="title"></input>
             </div>
-        </div>-->
-        <div class="single-line-text-input" id="name-input">
-            <label>Name</label>
-            <input type="text" value="Agile Metrics" name="title"></input>
         </div>
-        <br/>
-        <fieldset class="radio" id="optionsMetric">
-            <legend>Metric: </legend>
-            <input type="radio" id="radio-throughput" value="throughput" name="radio">
-            <label for="radio-throughput">Throughput</label><br/>
-            <!--<input type="radio" id="radio-cycletime" value="cycletime" name="radio">
-            <label for="radio-cycletime">Cycle Time</label><br/>-->
-            <input type="radio" id="radio-leadtime" value="leadtime" name="radio">
-            <label for="radio-leadtime">Lead Time</label><br/>
-        </fieldset>
-        <!--<br/>
-        <div id="128" class="combo input-text-box date-time drop">
-            <div class="wrap"><input type="text" id="chartStartDate" autocomplete="off"></div>
-            <div class="drop bowtie-icon bowtie-calendar"></div>
-        </div>-->
+        <div class="widget">
+            <fieldset class="radio" id="optionsMetric">
+                <legend>Metric: </legend>
+                <input type="radio" id="radio-throughput" value="throughput" name="radio">
+                <label for="radio-throughput">Throughput</label><br/>
+                <input type="radio" id="radio-leadtime" value="leadtime" name="radio">
+                <label for="radio-leadtime">Lead Time</label><br/>
+            </fieldset>
+
+        </div>
+        <div class="widget">
+            <p>Start date</p>
+            <div class="description">Leave blank to display the last 180 days of activity.</div>
+            <div class="single-line-text-input" id="date-input">
+                <label for="chartStartDate">Date</label>
+                <input type="text" id="chartStartDate" name="chartStartDate">
+                <div class="validation-error">
+                    <span class="icon-error-exclamation"></span>
+                    <span class="validation-error-text" id="validation"></span>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 
