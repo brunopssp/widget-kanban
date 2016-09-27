@@ -61,16 +61,23 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", 
                 if (settings.date) {
                     return "AND [System.CreatedDate] >= '" + settings.date + "' ";
                 } else {
-                    return "AND [System.CreatedDate] >= @Today - 180";
+                    return "AND [System.CreatedDate] >= @Today - 180 ";
                 }
             };
             if (WidgetHelpers.WidgetEvent.ConfigurationChange) {
+                $('#error').empty();
+                $('h2.title').text("");
+                $('#query-info-container').empty().text("");
+                $('#widget').css({ 'background-color': 'rgb(255, 255, 255)', 'text-align': 'center' });
+                $("<img></img>").attr("src", "img/loadingAnimation.gif").appendTo($('#query-info-container'));
+                $('#footer').empty().text("");
                 //recuperar area path 
                 return myTeam.getTeamFieldValues(teamContext).then(function (areaPath) {
                     //criar consulta
                     //nocture.dk/2016/01/02/lets-make-a-visual-studio-team-services-extension/
+                    //blog.joergbattermann.com/2016/05/05/vsts-tfs-rest-api-06-retrieving-and-querying-for-existing-work-items/
                     var Wiql = {
-                        query: "SELECT [System.Id],[System.Title] " + "FROM WorkItems " + "WHERE [System.WorkItemType] in ('Product Backlog Item', 'Bug') " + "AND [System.State] <> 'New' " + "AND [System.State] <> 'Removed' " + StartDate() + "AND [System.AreaPath] under '" + areaPath.defaultValue + "'"
+                        query: "SELECT [System.Id],[System.Title] " + "FROM WorkItems " + "WHERE [System.WorkItemType] in ('Product Backlog Item', 'Bug') " + "AND [System.State] <> 'New' " + "AND [System.State] <> 'Removed' " + "AND [System.State] ever 'Approved' " + StartDate() + "AND [System.AreaPath] under '" + areaPath.defaultValue + "'"
                     };
 
                     client.queryByWiql(Wiql).then(ResultQuery, function (error) {
@@ -134,28 +141,6 @@ function ProcessRevisions(revisions) {
         return;
     }
 
-    //Validations
-    if (!revisions.some(function (s) {
-        return s.fields["System.State"] == "Approved";
-    })) //Verify if PBI was approved
-        {
-            EndProcess();
-            return;
-        }
-    if (!revisions.some(function (s) {
-        return s.fields["System.State"] == "Done";
-    })) //Verify if PBI wasn't Done
-        {
-            EndProcess();
-            return;
-        }
-    if (revisions[revisions.length - 1].fields["System.State"] == "Approved") //Verify if PBI return to initial state
-        {
-            EndProcess();
-            return;
-        }
-    //Validations^^^^^^^^
-
     var RevApproved = revisions.find(function (workItemRevision) {
         return workItemRevision.fields["System.State"] == "Approved";
     });
@@ -185,6 +170,12 @@ function ShowResult() {
             formatError();
             return;
         }
+
+        $('#error').empty();
+        $('h2.title').text(settings.title);
+        $('#query-info-container').empty().text("0");
+        $('#widget').css({ 'color': 'white', 'background-color': 'rgb(0, 156, 204)', 'text-align': 'left' });
+
         if (settings.title || settings.title == "") {
             var $title = $('h2.title');
             $title.text(settings.title);
