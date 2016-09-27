@@ -24,8 +24,7 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", 
             return {
                 load: function(widgetSettings, widgetConfigurationContext) {
                     settings = JSON.parse(widgetSettings.customSettings.data);
-                    if (settings && settings.metric) {
-                        //$(queryDropdown).val(settings.queryPath);
+                    if (settings && settings.metric && settings.title) {
                         $(title).val(settings.title);
 
                         if (settings.metric == "throughput")
@@ -36,13 +35,10 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", 
                         $("input[name=radio]")[0].checked = true;
                     }
 
-                    //TFS_Wit_WebApi.getClient().getQuery(VSS.getWebContext().project.id, "Shared Queries", TFS_contracts.QueryExpand.None, 2).then(getListQueries);
-
                     //Enable Live Preview
                     $("#name-input input").on("keyup", function() {
                         var customSettings = {
                             data: JSON.stringify({
-                                //queryPath: $(queryDropdown).val(),
                                 title: $(title).val(),
                                 metric: $(optionsMetric, "#optionsMetric").val()
                             })
@@ -54,7 +50,6 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", 
                     $("#optionsMetric input").on("change", function() {
                         var customSettings = {
                             data: JSON.stringify({
-                                //queryPath: $(queryDropdown).val(),
                                 title: $(title).val(),
                                 metric: $(optionsMetric, "#optionsMetric").val()
                             })
@@ -69,7 +64,6 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", 
                 onSave: function() {
                     var customSettings = {
                         data: JSON.stringify({
-                            //queryPath: $(queryDropdown).val(),
                             title: $(title).val(),
                             metric: $(optionsMetric, "#optionsMetric").val()
                         })
@@ -81,24 +75,3 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", 
         VSS.notifyLoadSucceeded();
     }
 );
-
-// function getListQueries(queries) {
-//     //Get query result
-//     queries.children.forEach(rootFolderQuery => {
-//         if (rootFolderQuery.hasChildren == true) {
-//             rootFolderQuery.children.forEach(subFolderQuery => {
-//                 if (subFolderQuery.hasChildren == undefined) {
-//                     fillDropDownList(subFolderQuery);
-//                 }
-//             });
-//         }
-//         if (rootFolderQuery.hasChildren == undefined) {
-//             fillDropDownList(rootFolderQuery);
-//         }
-//     });
-// }
-
-// function fillDropDownList(rootFolderQuery) {
-//     //Set results to DropDownList
-//     $("<option>" + rootFolderQuery.path + "</option>").attr("value", rootFolderQuery.path).appendTo($(queryDropdown));
-// }
