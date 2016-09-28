@@ -76,10 +76,10 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", 
                     //criar consulta
                     //nocture.dk/2016/01/02/lets-make-a-visual-studio-team-services-extension/
                     //blog.joergbattermann.com/2016/05/05/vsts-tfs-rest-api-06-retrieving-and-querying-for-existing-work-items/
-                    var whereConditions = "[System.WorkItemType] in ('Product Backlog Item', 'Bug') " + "AND [System.State] <> 'New' " + "AND [System.State] <> 'Removed' " + "AND [System.State] ever 'Approved' " + "AND [System.AreaPath] under '" + areaPath.defaultValue + "'";
+                    var whereConditions = "[System.WorkItemType] in ('Product Backlog Item', 'Bug') " + "AND [System.State] <> 'New' " + "AND [System.State] <> 'Removed' " + "AND [System.AreaPath] under '" + areaPath.defaultValue + "'";
 
                     var Wiql = {
-                        query: "SELECT [System.Id],[System.Title] " + "FROM WorkItems " + "WHERE ((" + whereConditions + " AND [System.State] <> 'Done') " + "OR (" + ClosedtDate() + "AND " + whereConditions + "))"
+                        query: "SELECT [System.Id],[System.Title] " + "FROM WorkItems " + "WHERE ((" + whereConditions + " AND [System.State] <> 'Done') " + "OR (" + ClosedtDate() + "AND [System.State] ever 'Approved' AND " + whereConditions + "))"
                     };
 
                     client.queryByWiql(Wiql).then(ResultQuery, function (error) {

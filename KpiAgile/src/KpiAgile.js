@@ -76,14 +76,14 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", 
                             var whereConditions = "[System.WorkItemType] in ('Product Backlog Item', 'Bug') " +
                                 "AND [System.State] <> 'New' " +
                                 "AND [System.State] <> 'Removed' " +
-                                "AND [System.State] ever 'Approved' " +
+
                                 "AND [System.AreaPath] under '" + areaPath.defaultValue + "'";
 
                             var Wiql = {
                                 query: "SELECT [System.Id],[System.Title] " +
                                     "FROM WorkItems " +
                                     "WHERE ((" + whereConditions + " AND [System.State] <> 'Done') " +
-                                    "OR (" + ClosedtDate() + "AND " + whereConditions + "))"
+                                    "OR (" + ClosedtDate() + "AND [System.State] ever 'Approved' AND " + whereConditions + "))"
                             };
 
                             client.queryByWiql(Wiql).then(ResultQuery,
