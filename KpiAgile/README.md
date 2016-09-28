@@ -10,7 +10,6 @@ Get the Lead Time and the Throughput of a set of Work Items in a specific query 
 ####Babel
 	npm install --save-dev babel-cli
 	npm install --save-dev babel-preset-es2015
-	//npm install --save-dev babel-polyfill
 
 ##Empacote, Publique e Compartilhe
 > Ref: https://www.visualstudio.com/en-us/docs/integrate/extensions/develop/add-dashboard-widget#step-6--package-publish-and-share
