@@ -57,11 +57,11 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", 
                 teamId: VSS.getWebContext().team.id
             };
 
-            var StartDate = function StartDate() {
+            var ClosedtDate = function ClosedtDate() {
                 if (settings.date) {
-                    return "AND [System.CreatedDate] >= '" + settings.date + "' ";
+                    return "[Microsoft.VSTS.Common.ClosedDate] >= '" + settings.date + "' ";
                 } else {
-                    return "AND [System.CreatedDate] >= @Today - 180 ";
+                    return "[Microsoft.VSTS.Common.ClosedDate] >= @Today - 180 ";
                 }
             };
             if (WidgetHelpers.WidgetEvent.ConfigurationChange) {
@@ -76,11 +76,14 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", 
                     //criar consulta
                     //nocture.dk/2016/01/02/lets-make-a-visual-studio-team-services-extension/
                     //blog.joergbattermann.com/2016/05/05/vsts-tfs-rest-api-06-retrieving-and-querying-for-existing-work-items/
+                    var whereConditions = "[System.WorkItemType] in ('Product Backlog Item', 'Bug') " + "AND [System.State] <> 'New' " + "AND [System.State] <> 'Removed' " + "AND [System.State] ever 'Approved' " + "AND [System.AreaPath] under '" + areaPath.defaultValue + "'";
+
                     var Wiql = {
-                        query: "SELECT [System.Id],[System.Title] " + "FROM WorkItems " + "WHERE [System.WorkItemType] in ('Product Backlog Item', 'Bug') " + "AND [System.State] <> 'New' " + "AND [System.State] <> 'Removed' " + "AND [System.State] ever 'Approved' " + StartDate() + "AND [System.AreaPath] under '" + areaPath.defaultValue + "'"
+                        query: "SELECT [System.Id],[System.Title] " + "FROM WorkItems " + "WHERE ((" + whereConditions + " AND [System.State] <> 'Done') " + "OR (" + ClosedtDate() + "AND " + whereConditions + "))"
                     };
 
                     client.queryByWiql(Wiql).then(ResultQuery, function (error) {
+                        formatError();
                         $('#error').text("There is an error in query: " + error.message);
                         return WidgetHelpers.WidgetStatusHelper.Failure(error.message);
                     });
