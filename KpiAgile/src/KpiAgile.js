@@ -30,7 +30,6 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", 
 
                 // Get a WIT client to make REST calls to VSTS
                 client = TFS_Wit_WebApi.getClient();
-                var projectId = VSS.getWebContext().project.id;
                 var myTeam = TFS_Team_WebApi.getClient();
                 settings = JSON.parse(widgetSettings.customSettings.data);
 
@@ -58,7 +57,7 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", 
                     if (settings.date) {
                         return "[Microsoft.VSTS.Common.ClosedDate] >= '" + settings.date + "' ";
                     } else {
-                        return "[Microsoft.VSTS.Common.ClosedDate] >= @Today - 180 ";
+                        return "[Microsoft.VSTS.Common.ClosedDate] >= @Today - 90 ";
                     }
                 }
                 if (WidgetHelpers.WidgetEvent.ConfigurationChange) {
@@ -75,9 +74,11 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", 
                             //blog.joergbattermann.com/2016/05/05/vsts-tfs-rest-api-06-retrieving-and-querying-for-existing-work-items/
                             var whereConditions = "[System.WorkItemType] in ('Product Backlog Item', 'Bug') " +
                                 "AND [System.State] <> 'New' " +
-                                "AND [System.State] <> 'Removed' " +
+                                "AND [System.State] <> 'Removed' "
 
-                                "AND [System.AreaPath] under '" + areaPath.defaultValue + "'";
+                            areaPath.values.forEach(function(teamAreaPaths) {
+                                whereConditions = whereConditions + "AND [System.AreaPath] under '" + teamAreaPaths.value + "' ";
+                            });
 
                             var Wiql = {
                                 query: "SELECT [System.Id],[System.Title] " +
@@ -125,13 +126,6 @@ function ResultQuery(resultQuery) {
         if (resultQueryLength > 0) {
             resultQuery.workItems.forEach(workItem => {
                 client.getRevisions(workItem.id).then(ProcessRevisions);
-            });
-        }
-    } else {
-        resultQueryLength = resultQuery.workItemRelations.length;
-        if (resultQueryLength > 0) {
-            resultQuery.workItemRelations.forEach(workItem => {
-                client.getRevisions(workItem.target.id).then(ProcessRevisions);
             });
         }
     }
