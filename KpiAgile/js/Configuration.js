@@ -11,6 +11,7 @@ Please note: None of the conditions outlined in the disclaimer above will superc
 */
 //var queryDropdown = ("#query-path-dropdown");
 var optionsMetric = "input[type='radio'][name='radio']:checked";
+var startState = "input[type='radio'][name='radioState']:checked";
 var title = "input[type='text'][name='title']";
 var startDate = "input[type='text'][name='chartStartDate']";
 var settings = null;
@@ -29,12 +30,14 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", 
         return {
             load: function load(widgetSettings, widgetConfigurationContext) {
                 settings = JSON.parse(widgetSettings.customSettings.data);
-                if (settings && settings.metric && settings.title && settings.date) {
+                if (settings && settings.metric && settings.title && settings.date && settings.state) {
                     $(title).val(settings.title);
                     $(startDate).val(settings.date);
                     if (settings.metric == "throughput") $("input[name=radio]")[0].checked = true;else if (settings.metric == "leadtime") $("input[name=radio]")[1].checked = true;
+                    if (settings.state == "approved") $("input[name=radioState]")[0].checked = true;else if (settings.state == "committed") $("input[name=radioState]")[1].checked = true;
                 } else {
                     $("input[name=radio]")[0].checked = true;
+                    $("input[name=radioState]")[0].checked = true;
                 }
 
                 //Enable Live Preview
@@ -53,7 +56,21 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", 
                         data: JSON.stringify({
                             title: $(title).val(),
                             date: $(startDate).val(),
-                            metric: $(optionsMetric, "#optionsMetric").val()
+                            metric: $(optionsMetric, "#optionsMetric").val(),
+                            state: $(startState, "#startState").val()
+                        })
+                    };
+                    var eventName = WidgetHelpers.WidgetEvent.ConfigurationChange;
+                    var eventArgs = WidgetHelpers.WidgetEvent.Args(customSettings);
+                    widgetConfigurationContext.notify(eventName, eventArgs);
+                });
+                $("#startState input").on("change", function () {
+                    var customSettings = {
+                        data: JSON.stringify({
+                            title: $(title).val(),
+                            date: $(startDate).val(),
+                            metric: $(optionsMetric, "#optionsMetric").val(),
+                            state: $(startState, "#startState").val()
                         })
                     };
                     var eventName = WidgetHelpers.WidgetEvent.ConfigurationChange;
@@ -72,7 +89,8 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", 
                         data: JSON.stringify({
                             title: $(title).val(),
                             date: $(startDate).val(),
-                            metric: $(optionsMetric, "#optionsMetric").val()
+                            metric: $(optionsMetric, "#optionsMetric").val(),
+                            state: $(startState, "#startState").val()
                         })
                     };
                     var eventName = WidgetHelpers.WidgetEvent.ConfigurationChange;
@@ -87,7 +105,8 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", 
                     data: JSON.stringify({
                         title: $(title).val(),
                         date: $(startDate).val(),
-                        metric: $(optionsMetric, "#optionsMetric").val()
+                        metric: $(optionsMetric, "#optionsMetric").val(),
+                        state: $(startState, "#startState").val()
                     })
                 };
                 return WidgetHelpers.WidgetConfigurationSave.Valid(customSettings);

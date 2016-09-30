@@ -18,6 +18,8 @@ var settings = null;
 var dtStartThroughput = new Date();
 var dtEndThroughput = new Date(1969);
 var client = null;
+var ClosedDate = null;
+//var state = "Approved";
 
 VSS.init({
     explicitNotifyLoaded: true,
@@ -37,7 +39,8 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", 
             if (!settings) {
                 //if no settings, choose throughput
                 var customSettings = {
-                    metric: "throughput"
+                    metric: "throughput",
+                    state: "Approved"
                 };
                 settings = customSettings;
             }
@@ -56,13 +59,6 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", 
                 teamId: VSS.getWebContext().team.id
             };
 
-            var ClosedtDate = function ClosedtDate() {
-                if (settings.date) {
-                    return "[Microsoft.VSTS.Common.ClosedDate] >= '" + settings.date + "' ";
-                } else {
-                    return "[Microsoft.VSTS.Common.ClosedDate] >= @Today - 90 ";
-                }
-            };
             if (WidgetHelpers.WidgetEvent.ConfigurationChange) {
                 $('#error').empty();
                 $('h2.title').text("");
@@ -72,20 +68,7 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", 
                 $('#footer').empty().text("");
                 //recuperar area path 
                 return myTeam.getTeamFieldValues(teamContext).then(function (areaPath) {
-                    //criar consulta
-                    //nocture.dk/2016/01/02/lets-make-a-visual-studio-team-services-extension/
-                    //blog.joergbattermann.com/2016/05/05/vsts-tfs-rest-api-06-retrieving-and-querying-for-existing-work-items/
-                    var whereConditions = "[System.WorkItemType] in ('Product Backlog Item', 'Bug') " + "AND [System.State] <> 'New' " + "AND [System.State] <> 'Removed' ";
-
-                    areaPath.values.forEach(function (teamAreaPaths) {
-                        whereConditions = whereConditions + "AND [System.AreaPath] under '" + teamAreaPaths.value + "' ";
-                    });
-
-                    var Wiql = {
-                        query: "SELECT [System.Id],[System.Title] " + "FROM WorkItems " + "WHERE ((" + whereConditions + " AND [System.State] <> 'Done') " + "OR (" + ClosedtDate() + "AND [System.State] ever 'Approved' AND " + whereConditions + "))"
-                    };
-
-                    client.queryByWiql(Wiql).then(ResultQuery, function (error) {
+                    client.queryByWiql(GetWiql(areaPath, settings.state)).then(ResultQuery, function (error) {
                         formatError();
                         $('#error').text("There is an error in query: " + error.message);
                         return WidgetHelpers.WidgetStatusHelper.Failure(error.message);
@@ -107,6 +90,32 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", 
     });
     VSS.notifyLoadSucceeded();
 });
+
+function GetWiql(areaPath, stateEver) {
+
+    //ClosedDate = function() {
+    if (settings.date) {
+        ClosedDate = "[Microsoft.VSTS.Common.ClosedDate] >= '" + settings.date + "' ";
+    } else {
+        ClosedDate = "[Microsoft.VSTS.Common.ClosedDate] >= @Today - 90 ";
+    }
+    //}
+    //criar consulta
+    //nocture.dk/2016/01/02/lets-make-a-visual-studio-team-services-extension/
+    //blog.joergbattermann.com/2016/05/05/vsts-tfs-rest-api-06-retrieving-and-querying-for-existing-work-items/
+    var whereConditions = "[System.WorkItemType] in ('Product Backlog Item', 'Bug') " + "AND [System.State] <> 'New' " + "AND [System.State] <> 'Removed' AND ";
+
+    var teamAreaPaths = "([System.AreaPath] under '" + areaPath.values[0].value + "' ";
+    var i;
+    for (i = 1; i < areaPath.values.length; i++) {
+        teamAreaPaths += " OR [System.AreaPath] under '" + areaPath.values[i].value + "' ";
+    }
+    whereConditions += teamAreaPaths + ")";
+    var Wiql = {
+        query: "SELECT [System.Id],[System.Title] " + "FROM WorkItems " + "WHERE ((" + whereConditions + " AND [System.State] <> 'Done') " + "OR (" + ClosedDate + "AND [System.State] ever '" + stateEver + "' AND " + whereConditions + "))"
+    };
+    return Wiql;
+}
 
 function ResultQuery(resultQuery) {
 
@@ -141,15 +150,15 @@ function ProcessRevisions(revisions) {
     }
 
     var RevApproved = revisions.find(function (workItemRevision) {
-        return workItemRevision.fields["System.State"] == "Approved";
+        return workItemRevision.fields["System.State"] == settings.state;
     });
 
     var RevDone = revisions.find(function (workItemRevision) {
-        return workItemRevision.fields["System.State"] == "Done";
+        return workItemRevision.fields["Microsoft.VSTS.Common.ClosedDate"] != undefined;
     });
 
     var dateApproved = RevApproved != null && RevApproved.fields != undefined ? new Date(RevApproved.fields["System.ChangedDate"]) : new Date();
-    var dateDone = RevDone != null && RevDone.fields != undefined ? new Date(RevDone.fields["System.ChangedDate"]) : new Date();
+    var dateDone = RevDone != null && RevDone.fields != undefined ? new Date(RevDone.fields["Microsoft.VSTS.Common.ClosedDate"]) : new Date();
 
     //Throughput - Range date
     if (dtStartThroughput > dateApproved) {
@@ -176,8 +185,9 @@ function ShowResult() {
         $('#widget').css({ 'color': 'white', 'background-color': 'rgb(0, 156, 204)', 'text-align': 'left' });
 
         if (settings.title || settings.title == "") {
-            var $title = $('h2.title');
-            $title.text(settings.title);
+            $('h2.title').text(settings.title);
+        } else {
+            $('h2.title').text("Agile Metric");
         }
         var tsIntervaloTotal = DaysBetween(dtStartThroughput, dtEndThroughput);
 
