@@ -120,6 +120,8 @@ function GetWiql(areaPath, stateEver) {
 function ResultQuery(resultQuery) {
 
     //Clean the variables for each save time
+    dtStartThroughput = new Date();
+    dtEndThroughput = new Date(1969);
     intCountDoneWI = new Array();
     intCountWI = new Array();
     nWIP = new Array();

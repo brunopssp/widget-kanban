@@ -30,11 +30,11 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/RestClient", 
         return {
             load: function load(widgetSettings, widgetConfigurationContext) {
                 settings = JSON.parse(widgetSettings.customSettings.data);
-                if (settings && settings.metric && settings.title && settings.date && settings.state) {
+                if (settings && settings.metric && settings.title && settings.state) {
                     $(title).val(settings.title);
                     $(startDate).val(settings.date);
                     if (settings.metric == "throughput") $("input[name=radio]")[0].checked = true;else if (settings.metric == "leadtime") $("input[name=radio]")[1].checked = true;
-                    if (settings.state == "approved") $("input[name=radioState]")[0].checked = true;else if (settings.state == "committed") $("input[name=radioState]")[1].checked = true;
+                    if (settings.state == "Approved") $("input[name=radioState]")[0].checked = true;else if (settings.state == "Committed") $("input[name=radioState]")[1].checked = true;
                 } else {
                     $("input[name=radio]")[0].checked = true;
                     $("input[name=radioState]")[0].checked = true;
