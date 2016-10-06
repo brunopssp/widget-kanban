@@ -1,24 +1,21 @@
-# Kanban Metric Widget
+## Kanban Metric Widget
 Get the Lead Time and the Throughput of a set of Work Items in a specific query and show as a tile on TFS dashboard.
 
-##Objetivo
->Esse widget verifica o Throughput (Itens Entregues) ou Lead Time (Tempo para conclusão) dos work items retornados em uma determinada consulta.
-
-##Configuração do Ambiente
+###Environment configuration
 >####Node
   https://nodejs.org
 ####Babel
 	npm install --save-dev babel-cli
 	npm install --save-dev babel-preset-es2015
 
-##Empacote, Publique e Compartilhe
+###Package, Publish and Share
 > Ref: https://www.visualstudio.com/en-us/docs/integrate/extensions/develop/add-dashboard-widget#step-6--package-publish-and-share
-####Atualizar o arquivo manifest
+####Update the manifest file
 	vss-extension.json
-####Empacotar a extensão
+####Package the extension
 	npm i -g tfx-cli
-	cd <pasta da extensão onde o vss-extension.json está>
+	cd <folder of the extension where the vss-extension.json exists>
 	tfx extension create
-####Upload e Install no TFS
+####Upload and Install
 https://www.visualstudio.com/en-us/docs/marketplace/get-tfs-extensions#upload-to-team-foundation-server
 	
