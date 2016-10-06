@@ -3,7 +3,7 @@ Shows a Lead Time and Throughput forecast based on history of your deliveries an
 
 ![CT_Confidence](img/widget.png)
 
-In this example, I will take 13.7 days to get a work item done after it's priorezed.
+In this example, I will take 13.7 days to get a work item done after it's prioritized.
 
 #### Configuration
 
